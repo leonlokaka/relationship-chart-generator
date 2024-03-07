@@ -1,0 +1,30 @@
+html body main {
+  position: relative;
+  height: "100vh";
+}
+
+body {
+  background: #eee;
+  font-family: Helvetica Neue, Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  color: #000;
+  margin: 0;
+  padding: 0;
+}
+
+.MuiGrid-root,
+.MuiPaper-root {
+  border-radius: 0 !important;
+}
+
+@media (max-width: 768px) {
+  p {
+    font-size: 0.7rem;
+  }
+  .MuiTypography-h5 {
+    font-size: 1.2rem;
+  }
+  .MuiTypography-h6 {
+    font-size: 1.1rem;
+  }
+}

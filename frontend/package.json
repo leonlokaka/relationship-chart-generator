@@ -1,0 +1,42 @@
+{
+  "name": "relationship-chart-generator",
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@emotion/cache": "^11.11.0",
+    "@emotion/react": "^11.11.3",
+    "@emotion/styled": "^11.11.0",
+    "@mui/icons-material": "^5.15.2",
+    "@mui/material": "^5.15.2",
+    "@mui/material-nextjs": "^5.15.3",
+    "@types/aos": "^3.0.7",
+    "@uidotdev/usehooks": "^2.4.1",
+    "aos": "3.0.0-beta.6",
+    "cytoscape": "^3.28.1",
+    "cytoscape-compound-drag-and-drop": "^1.1.0",
+    "cytoscape-context-menus": "^4.1.0",
+    "cytoscape-edgehandles": "^4.0.1",
+    "moment": "^2.30.1",
+    "next": "14.0.4",
+    "react": "^18",
+    "react-cookie": "^7.1.0",
+    "react-cytoscapejs": "^2.0.0",
+    "react-dom": "^18",
+    "react-hook-form": "^7.51.0",
+    "swiper": "^11.0.5"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-cytoscapejs": "^1.2.5",
+    "@types/react-dom": "^18",
+    "eslint": "^8",
+    "eslint-config-next": "14.0.4",
+    "typescript": "^5"
+  }
+}
