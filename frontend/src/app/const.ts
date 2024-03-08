@@ -37,7 +37,7 @@ const defaultData: IMainData = {
         id: "cat",
         position: { x: 100, y: 40 },
         type: NodeStlyeType.triangle,
-        image: "https://live.staticflickr.com/7272/7633179468_3e19e45a0c_b.jpg"
+        image: "https://live.staticflickr.com/7272/7633179468_3e19e45a0c_b.jpg",
       },
     },
     {
@@ -126,8 +126,13 @@ const convertCYElementsObjToMainData = (
   };
   nodes.forEach((node: cytoscape.NodeSingular) => {
     temp.nodes.push({
-      data: {...node.data(), position: node.position()},
-      // style: node.style(),
+      data: { ...node.data(), position: node.position() },
+
+      style: node.data("image")
+        ? {
+            "background-image": node.data("image"),
+          }
+        : {},
       classes: node.classes(),
     });
   });

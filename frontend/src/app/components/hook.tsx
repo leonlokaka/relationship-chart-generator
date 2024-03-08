@@ -1,51 +1,21 @@
-import React, {
-  MutableRefObject,
-  useCallback,
+import {
+  useEffect,
+  useRef,
 } from "react";
-import { useSwiperSlide } from "swiper/react";
 
-function useGetAosRefList(length: number) {
-  const aosRefList = React.useRef<any>([]);
-  aosRefList.current = Array(length)
-    .fill(null)
-    .map((item, i) => aosRefList.current[i] ?? React.createRef());
 
-  return aosRefList;
+function useEventListener(eventName: string, handler: any, element = window) {
+  const savedHandler = useRef<any>();
+  useEffect(() => {
+    savedHandler.current = handler;
+  }, [handler]);
+  useEffect(() => {
+    const eventListener = (event: any) => savedHandler.current(event);
+    element.addEventListener(eventName, eventListener);
+    return () => {
+      element.removeEventListener(eventName, eventListener);
+    };
+  }, [eventName, element]);
 }
 
-function useSwiperAosCoordinator(aosRefs: MutableRefObject<any>) {
-  const swiperSlide = useSwiperSlide();
-  const handleSwiperChange = useCallback(
-    function handleSwiperChange() {
-      if (!aosRefs.current) return;
-
-      if (swiperSlide.isActive) {
-        // manual trigger
-        for (let i = 0; i < aosRefs.current.length; i++) {
-          if (
-            aosRefs.current[i].current &&
-            !aosRefs.current[i].current.classList.contains("aos-animate")
-          )
-            aosRefs.current[i].current.classList.add("aos-animate");
-        }
-      } else {
-        for (let i = 0; i < aosRefs.current.length; i++) {
-          if (
-            aosRefs.current[i].current &&
-            aosRefs.current[i].current.classList.contains("aos-animate")
-          )
-            aosRefs.current[i].current.classList.remove("aos-animate");
-        }
-      }
-    },
-    [aosRefs, swiperSlide.isActive]
-  );
-
-  React.useEffect(() => {
-      handleSwiperChange();
-  }, [handleSwiperChange, swiperSlide]);
-
-  return;
-}
-
-export { useSwiperAosCoordinator, useGetAosRefList };
+export { useEventListener };

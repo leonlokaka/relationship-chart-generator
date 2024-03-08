@@ -11,45 +11,43 @@ import { useEffect } from "react";
 import ReactDOM from "react-dom";
 import { useForm, SubmitHandler } from "react-hook-form";
 
-interface INodeFormInput {
+interface IEdgeFormInput {
   label: string;
 }
 
-interface INodeFormProps {
+interface IEdgeFormProps {
   children: JSX.Element;
-  formSubmit: (data: INodeFormInput) => void;
-  initValues?: INodeFormInput;
+  formSubmit: (data: IEdgeFormInput) => void;
+  initValues?: IEdgeFormInput;
 }
 
-export default function NodeForm({
+export default function EdgeForm({
   children,
   formSubmit,
   initValues,
-}: INodeFormProps) {
+}: IEdgeFormProps) {
   const {
     register,
     handleSubmit,
     formState: { errors },
     reset,
-  } = useForm<INodeFormInput>();
+  } = useForm<IEdgeFormInput>();
 
   // useEffect(function init() {
   // }, []);
 
-  const onSubmit: SubmitHandler<INodeFormInput> = (data) => {
+  const onSubmit: SubmitHandler<IEdgeFormInput> = (data) => {
     console.log(data);
     reset();
     formSubmit(data);
   };
 
   const formRegisterItem = {
-    label: { required: "required", maxLength: 20 },
-    // image: { required: false,}
-    // nodeShape: { required: false,}
-    // labelPosition: { required: false,}
-    // labelColor: { required: false,}
-    // backgroundColor: { required: false,}
-    // borderColor: { required: false,}
+    label: { maxLength: 20 },
+    // lineStyle: { required: false, },
+    // arrowType: { required: false, },
+    // labelColor: { required: false, },
+    // lineColor: { required: false, },
   };
 
   return (

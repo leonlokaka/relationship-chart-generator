@@ -53,9 +53,7 @@ function GlobalDialog({ state }: any) {
         >
           <DialogTitle>{reducer.state.globalDialog.title}</DialogTitle>
           <DialogContent>
-            <DialogContentText id="alert-dialog-slide-description">
               {reducer.state.globalDialog.content}
-            </DialogContentText>
           </DialogContent>
           <DialogActions>
             {reducer.state.globalDialog.actions}

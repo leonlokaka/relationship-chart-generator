@@ -3,17 +3,23 @@ import { IGlobalDialogArgs } from "../components/GlobalDialog";
 
 interface IGlobalReducerState {
   globalDialog: IGlobalDialogArgs;
+  cyContextMenuEvent: {
+    eventName: string | null;
+    event: any;
+  };
 }
 interface IGlobalReducerStateArgs {
-  globalDialog: Partial<IGlobalDialogArgs>;
+  globalDialog?: Partial<IGlobalReducerState["globalDialog"]>;
+  cyContextMenuEvent?: IGlobalReducerState["cyContextMenuEvent"];
 }
 
 enum GlobalReducerActionType {
-  "UpdateGlobalDialog"="UpdateGlobalDialog"
+  "UpdateGlobalDialog" = "UpdateGlobalDialog",
+  "cyContentMenuEventTrigger" = "cyContentMenuEventTrigger",
 }
 
 interface IGlobalReducerAction {
-  type: GlobalReducerActionType.UpdateGlobalDialog;
+  type: GlobalReducerActionType;
   payload: IGlobalReducerStateArgs;
 }
 function GlobalReducer(
@@ -29,6 +35,11 @@ function GlobalReducer(
           ...action.payload.globalDialog,
         },
       };
+    case GlobalReducerActionType.cyContentMenuEventTrigger:
+      return {
+        ...state,
+        cyContextMenuEvent: action.payload.cyContextMenuEvent,
+      };
   }
   return state;
 }
@@ -38,6 +49,10 @@ const initGlobalReducer: IGlobalReducerState = {
     open: false,
     title: "",
     handleClose: () => {},
+  },
+  cyContextMenuEvent: {
+    eventName: null,
+    event: null,
   },
 };
 
@@ -52,4 +67,9 @@ const initGlobalReducerContext: {
 const GlobalReducerContext = createContext(initGlobalReducerContext);
 
 export type { IGlobalReducerState, IGlobalReducerAction };
-export { GlobalReducer, GlobalReducerContext, initGlobalReducer, GlobalReducerActionType };
+export {
+  GlobalReducer,
+  GlobalReducerContext,
+  initGlobalReducer,
+  GlobalReducerActionType,
+};
