@@ -2,18 +2,14 @@
 
 import CytoscapeComponent from "react-cytoscapejs";
 import { Button, Fab, Zoom } from "@mui/material";
-import { useCallback, useEffect } from "react";
 
 import UpIcon from "@mui/icons-material/KeyboardArrowUp";
 
-import { IMainData, defaultData, defaultStylesheet } from "./const";
-import { useCookies } from "react-cookie";
+import { defaultStylesheet } from "./const";
 
-import lodash from "lodash";
 import { useCYHook } from "./components/cyHook";
 
 export default function Home() {
-  const [cookies, setCookie, removeCookie] = useCookies(["data"]);
 
   const {
     save,

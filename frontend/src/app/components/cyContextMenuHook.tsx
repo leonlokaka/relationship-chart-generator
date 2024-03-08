@@ -5,8 +5,15 @@ import {
   GlobalReducerContext,
 } from "../reducer/GlobalRecuder";
 import EdgeForm from "./EdgeForm";
-import NodeForm from "./NodeForm";
+import NodeForm, { INodeFormInput } from "./NodeForm";
 import { ICyExtensions, getUngroupBatch } from "./cyHook";
+import {
+  ChartEdgeFormConverter,
+  ChartNodeFormConverter,
+  NodeLabelPosition,
+  NodeShape,
+} from "../const";
+import { useGlobalDialog } from "./GlobalDialog";
 
 enum cyMenuItems {
   "connectTo" = "connectTo",
@@ -22,20 +29,7 @@ function useCYContextMenuHook(
   cyExtensions: ICyExtensions | undefined
 ) {
   const { state, dispatch } = useContext(GlobalReducerContext);
-
-  const closeDialog = useCallback(
-    function closeDialog() {
-      dispatch({
-        type: GlobalReducerActionType.UpdateGlobalDialog,
-        payload: {
-          globalDialog: { open: false, content: <></>, title: "" },
-        },
-      });
-      state.globalDialog.handleClose();
-    },
-    [dispatch, state.globalDialog]
-  );
-
+  const { closeDialog } = useGlobalDialog();
   useEffect(
     function onContextMenuEvent() {
       const { event, eventName } = state.cyContextMenuEvent;
@@ -47,41 +41,43 @@ function useCYContextMenuHook(
           cyExtensions?.cyEdgeHandles.start(target);
           break;
         case cyMenuItems.properties:
+          let dialogContent = <></>;
+          if (target.is("node")) {
+            const chartNodeFormConverter = new ChartNodeFormConverter(target);
+            dialogContent = (
+              <NodeForm
+                formSubmit={(data) => {
+                  chartNodeFormConverter.parseFormValue(data);
+                  closeDialog();
+                }}
+                initValues={chartNodeFormConverter.toFormValue()}
+                customButton={<Button onClick={closeDialog}>Close</Button>}
+              ></NodeForm>
+            );
+          } else if (target.is("edge")) {
+            const chartEdgeFormConverter = new ChartEdgeFormConverter(target);
+            dialogContent = (
+              <EdgeForm
+                formSubmit={(data) => {
+                  chartEdgeFormConverter.parseFormValue(data);
+                  closeDialog();
+                }}
+                initValues={chartEdgeFormConverter.toFormValue()}
+                customButton={<Button onClick={closeDialog}>Close</Button>}
+              ></EdgeForm>
+            );
+          }
           dispatch({
             type: GlobalReducerActionType.UpdateGlobalDialog,
             payload: {
               globalDialog: {
                 open: true,
-                title: target.data("label"),
-                content: (
-                  <>
-                    {target.is("node") && (
-                      <NodeForm
-                        formSubmit={(data) => {
-                          target.data("label", data.label);
-                          // refreshChart();
-                          closeDialog();
-                        }}
-                        initValues={{ label: target.data("label") }}
-                      >
-                        <Button onClick={closeDialog}>Close</Button>
-                      </NodeForm>
-                    )}
-                    {target.is("edge") && (
-                      <EdgeForm
-                        formSubmit={(data) => {
-                          target.data("label", data.label);
-                          // refreshChart();
-                          closeDialog();
-                        }}
-                        initValues={{ label: target.data("label") }}
-                      >
-                        <Button onClick={closeDialog}>Close</Button>
-                      </EdgeForm>
-                    )}
-                  </>
-                ),
+                title:
+                  "Node" +
+                  (target.data("label") ? `[${target.data("label")}]` : ""),
+                content: dialogContent,
                 actions: <></>,
+                showCloseBtn: false,
               },
             },
           });
@@ -90,7 +86,7 @@ function useCYContextMenuHook(
           const newNode = cyExtensions?.cyUndoRedo.do("add", {
             data: { position: event.position },
           });
-          cy?.nodes("#" + newNode.id())?.positions(event.position);
+          cy?.nodes(`#${newNode.id()}`)?.positions(event.position);
           break;
         case cyMenuItems.removeGroup:
           // parent.children().move({ parent: null });

@@ -9,8 +9,11 @@ import {
   Fade,
 } from "@mui/material";
 import { TransitionProps } from "@mui/material/transitions";
-import React, { useContext, useEffect } from "react";
-import { GlobalReducerActionType, GlobalReducerContext } from "../reducer/GlobalRecuder";
+import React, { useCallback, useContext, useEffect } from "react";
+import {
+  GlobalReducerActionType,
+  GlobalReducerContext,
+} from "../reducer/GlobalRecuder";
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
@@ -26,7 +29,15 @@ interface IGlobalDialogArgs {
   title: any;
   content?: any;
   actions?: any;
+  showCloseBtn?: boolean;
   handleClose: () => void;
+}
+
+const defaultGlobalDialogValue = {
+  open: false,
+  title: "",
+  showCloseBtn: true,
+  handleClose: () => {},
 }
 
 function GlobalDialog({ state }: any) {
@@ -36,35 +47,51 @@ function GlobalDialog({ state }: any) {
     reducer.dispatch({
       type: GlobalReducerActionType.UpdateGlobalDialog,
       payload: {
-        globalDialog: { open: false },
+        globalDialog: defaultGlobalDialogValue,
       },
     });
     reducer.state.globalDialog.handleClose();
   };
 
   return (
-    <> 
-        <Dialog
-          open={reducer.state.globalDialog.open}
-          TransitionComponent={Transition}
-          keepMounted
-          onClose={triggerClose}
-          aria-describedby="alert-dialog-slide-description"
-        >
-          <DialogTitle>{reducer.state.globalDialog.title}</DialogTitle>
-          <DialogContent>
-              {reducer.state.globalDialog.content}
-          </DialogContent>
-          <DialogActions>
-            {reducer.state.globalDialog.actions}
-            {!reducer.state.globalDialog.actions && (
-              <Button onClick={triggerClose}>Close</Button>
-            )}
-          </DialogActions>
-        </Dialog> 
+    <>
+      <Dialog
+        open={reducer.state.globalDialog.open}
+        TransitionComponent={Transition}
+        keepMounted
+        onClose={triggerClose}
+        aria-describedby="alert-dialog-slide-description"
+      >
+        <DialogTitle>{reducer.state.globalDialog.title}</DialogTitle>
+        <DialogContent>{reducer.state.globalDialog.content}</DialogContent>
+        <DialogActions>
+          {reducer.state.globalDialog.actions}
+          {reducer.state.globalDialog.showCloseBtn && (
+            <Button onClick={triggerClose}>Close</Button>
+          )}
+        </DialogActions>
+      </Dialog>
     </>
   );
 }
 
+function useGlobalDialog() {
+  const { state, dispatch } = useContext(GlobalReducerContext);
+  const closeDialog = useCallback(
+    function closeDialog() {
+      dispatch({
+        type: GlobalReducerActionType.UpdateGlobalDialog,
+        payload: {
+          globalDialog: defaultGlobalDialogValue,
+        },
+      });
+      state.globalDialog.handleClose();
+    },
+    [dispatch, state.globalDialog]
+  );
+
+  return { closeDialog };
+}
+
 export type { IGlobalDialogArgs };
-export { GlobalDialog };
+export { GlobalDialog, useGlobalDialog, defaultGlobalDialogValue };

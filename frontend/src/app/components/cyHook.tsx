@@ -1,6 +1,11 @@
-import { Button } from "@mui/material";
+import { Button, DialogContentText } from "@mui/material";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { INodeData, IMainData, convertCYElementsObjToMainData, defaultData } from "../const";
+import {
+  INodeData,
+  IMainData,
+  convertCYElementsObjToMainData,
+  defaultData,
+} from "../const";
 import {
   GlobalReducerActionType,
   GlobalReducerContext,
@@ -13,6 +18,7 @@ import { useCookies } from "react-cookie";
 import "cytoscape-context-menus/cytoscape-context-menus.css";
 import { cyMenuItems, useCYContextMenuHook } from "./cyContextMenuHook";
 import lodash from "lodash";
+import { useGlobalDialog } from "./GlobalDialog";
 
 type ICyExtensions = {
   cyMenu: any;
@@ -61,9 +67,14 @@ function useCYHook() {
   const [cyExtensions, setCYExtensions] = useState<ICyExtensions>();
 
   const { state, dispatch } = useContext(GlobalReducerContext);
-  const [cookies, setCookie, removeCookie] = useCookies(["data"]);
+  const [cookies, setCookie, removeCookie] = useCookies([
+    "data",
+    "pan",
+    "zoom",
+  ]);
 
   const { getCYMenuItems } = useCYContextMenuHook(cy, cyExtensions);
+  const { closeDialog } = useGlobalDialog();
 
   const init = useCallback(
     function init() {
@@ -106,10 +117,12 @@ function useCYHook() {
       if (newChartElements) {
         const dataStr = JSON.stringify(newChartElements);
         setCookie("data", dataStr);
+        setCookie("pan", cy?.pan());
+        setCookie("zoom", cy?.zoom());
         setSavedChartElements(lodash.cloneDeep(newChartElements));
       }
     },
-    [saveSnapshotChartElements, setCookie]
+    [cy, saveSnapshotChartElements, setCookie]
   );
 
   const refreshChart = useCallback(
@@ -123,11 +136,67 @@ function useCYHook() {
 
   const reloadChart = useCallback(
     function reloadChart() {
-      init();
-      setCY(undefined);
-      setLoaded(false);
+      // Show reminder
+      dispatch({
+        type: GlobalReducerActionType.UpdateGlobalDialog,
+        payload: {
+          globalDialog: {
+            open: true,
+            title: "Alert",
+            content: (
+              <DialogContentText>
+                All unsave changes and work history will be lost.
+              </DialogContentText>
+            ),
+            actions: (
+              <Button
+                onClick={() => {
+                  init();
+                  setCY(undefined);
+                  setLoaded(false);
+                  closeDialog();
+                }}
+              >
+                Confirm
+              </Button>
+            ),
+          },
+        },
+      });
     },
-    []
+    [closeDialog, dispatch, init]
+  );
+
+  const autoSetPosition = useCallback(
+    function autoSetPosition() {
+      // Show reminder
+      dispatch({
+        type: GlobalReducerActionType.UpdateGlobalDialog,
+        payload: {
+          globalDialog: {
+            open: true,
+            title: "Alert",
+            content: (
+              <DialogContentText>
+                All unsave changes and work history will be lost.
+              </DialogContentText>
+            ),
+            actions: (
+              <Button
+                onClick={() => {
+                  setIsAutoSetPosition(true);
+                  refreshChart();
+                  closeDialog();
+                }}
+              >
+                Confirm
+              </Button>
+            ),
+          },
+        },
+      });
+    },
+    [closeDialog, dispatch, refreshChart]
   );
 
   useEffect(
@@ -210,20 +279,13 @@ function useCYHook() {
           cyCompoundDragAndDrop,
         };
         cyMenu.appendMenuItems(getCYMenuItems);
-        cyCore.fit();
+        if (cookies.pan) cyCore.pan(cookies.pan);
+        if (cookies.zoom) cyCore.zoom(cookies.zoom);
         setCY(cyCore);
         setCYExtensions(newCyExtensions);
       }
     },
     [chartElements, cy, getCYMenuItems, cyMenuOptions]
-  );
-
-  const autoSetPosition = useCallback(
-    function autoSetPosition() {
-      setIsAutoSetPosition(true);
-      refreshChart();
-    },
-    [refreshChart]
   );
 
   useEffect(
@@ -236,6 +298,7 @@ function useCYHook() {
           delete node.data.position;
         });
         setIsAutoSetPosition(false);
+        cy.fit();
       } else
         cy.nodes().forEach((node: cytoscape.NodeSingular, i: number) => {
           const id = node.id();

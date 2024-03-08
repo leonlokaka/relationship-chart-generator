@@ -1,18 +1,17 @@
 const labelStyle = [
   {
-    selector: "node[label]",
+    selector: "node[label], edge[label]",
     style: {
       label: "data(label)",
     },
   },
 
   {
-    selector: "edge[label]",
+    selector: "node[?labelColor], edge[?labelColor]",
     style: {
-      label: "data(label)",
+      color: "data(labelColor)",
     },
   },
-
   {
     selector: ".top-left",
     style: {
@@ -132,9 +131,9 @@ const labelStyle = [
 
 const edgeArrowStyle = [
   {
-    selector: "edge[arrow]",
+    selector: "edge[arrowType]",
     style: {
-      "target-arrow-shape": "data(arrow)",
+      "target-arrow-shape": "data(arrowType)",
     },
   },
   {
@@ -147,11 +146,18 @@ const edgeArrowStyle = [
 
 const edgeStyle = [
   {
-    selector: "node[?flipLabel]",
+    selector: "edge[?lineColor]",
     style: {
-      "text-halign": "right",
+      "line-color": "data(lineColor)",
+      "target-arrow-color": "data(lineColor)",
     },
   },
+  // {
+  //   selector: "edge[?flipLabel]",
+  //   style: {
+  //     "text-halign": "right",
+  //   },
+  // },
   {
     selector: "edge.bezier",
     style: {
@@ -208,94 +214,78 @@ const edgeStyle = [
 ];
 
 const nodeStyle = [
-    {
-      selector: "node[?type]",
-      style: {
-        shape: "data(type)",
-      },
+  {
+    selector: "node[?type]",
+    style: {
+      shape: "data(type)",
     },
+  },
+  {
+    selector: "node[?backgroundColor]",
+    style: {
+      "background-color": "data(backgroundColor)",
+    },
+  },
+  {
+    selector: "node[?borderColor]",
+    style: {
+      "border-color": "data(borderColor)",
+    },
+  },
 ];
 
-enum NodeStlyeType {
-  "ellipse" = "ellipse",
-  "triangle" = "triangle",
-  "round-triangle" = "round-triangle",
-  "rectangle" = "rectangle",
-  "round-rectangle" = "round-rectangle",
-  "bottom-round-rectangle" = "bottom-round-rectangle",
-  "cut-rectangle" = "cut-rectangle",
-  "barrel" = "barrel",
-  "rhomboid" = "rhomboid",
-  "right-rhomboid" = "right-rhomboid",
-  "diamond" = "diamond",
-  "round-diamond" = "round-diamond",
-  "pentagon" = "pentagon",
-  "round-pentagon" = "round-pentagon",
-  "hexagon" = "hexagon",
-  "round-hexagon" = "round-hexagon",
-  "concave-hexagon" = "concave-hexagon",
-  "heptagon" = "heptagon",
-  "round-heptagon" = "round-heptagon",
-  "octagon" = "octagon",
-  "round-octagon" = "round-octagon",
-  "star" = "star",
-  "tag" = "tag",
-  "round-tag" = "round-tag",
-  "vee" = "vee",
-}
-
-
-const edgeHandlerStyle = [{
-    selector: '.eh-handle',
+const edgeHandlerStyle = [
+  {
+    selector: ".eh-handle",
     style: {
-      'background-color': 'red',
-      'width': 12,
-      'height': 12,
-      'shape': 'ellipse',
-      'overlay-opacity': 0,
-      'border-width': 12, // makes the handle easier to hit
-      'border-opacity': 0
-    }
+      "background-color": "red",
+      width: 12,
+      height: 12,
+      shape: "ellipse",
+      "overlay-opacity": 0,
+      "border-width": 12, // makes the handle easier to hit
+      "border-opacity": 0,
+    },
   },
 
   {
-    selector: '.eh-hover',
+    selector: ".eh-hover",
     style: {
-      'background-color': 'red'
-    }
+      "background-color": "red",
+    },
   },
 
   {
-    selector: '.eh-source',
+    selector: ".eh-source",
     style: {
-      'border-width': 2,
-      'border-color': 'red'
-    }
+      "border-width": 2,
+      "border-color": "red",
+    },
   },
 
   {
-    selector: '.eh-target',
+    selector: ".eh-target",
     style: {
-      'border-width': 2,
-      'border-color': 'red'
-    }
+      "border-width": 2,
+      "border-color": "red",
+    },
   },
 
   {
-    selector: '.eh-preview, .eh-ghost-edge',
+    selector: ".eh-preview, .eh-ghost-edge",
     style: {
-      'background-color': 'red',
-      'line-color': 'red',
-      'target-arrow-color': 'red',
-      'source-arrow-color': 'red'
-    }
+      "background-color": "red",
+      "line-color": "red",
+      "target-arrow-color": "red",
+      "source-arrow-color": "red",
+    },
   },
 
   {
-    selector: '.eh-ghost-edge.eh-preview-active',
+    selector: ".eh-ghost-edge.eh-preview-active",
     style: {
-      'opacity': 0
-    }
-  }
-]
-export { NodeStlyeType, edgeArrowStyle, labelStyle, edgeStyle, nodeStyle, edgeHandlerStyle };
+      opacity: 0,
+    },
+  },
+];
+export { edgeArrowStyle, labelStyle, edgeStyle, nodeStyle, edgeHandlerStyle };

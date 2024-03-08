@@ -1,5 +1,5 @@
 import { createContext, useReducer } from "react";
-import { IGlobalDialogArgs } from "../components/GlobalDialog";
+import { IGlobalDialogArgs, defaultGlobalDialogValue } from "../components/GlobalDialog";
 
 interface IGlobalReducerState {
   globalDialog: IGlobalDialogArgs;
@@ -22,6 +22,7 @@ interface IGlobalReducerAction {
   type: GlobalReducerActionType;
   payload: IGlobalReducerStateArgs;
 }
+
 function GlobalReducer(
   state: IGlobalReducerState,
   action: IGlobalReducerAction
@@ -45,11 +46,7 @@ function GlobalReducer(
 }
 
 const initGlobalReducer: IGlobalReducerState = {
-  globalDialog: {
-    open: false,
-    title: "",
-    handleClose: () => {},
-  },
+  globalDialog: defaultGlobalDialogValue,
   cyContextMenuEvent: {
     eventName: null,
     event: null,
