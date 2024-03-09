@@ -20,6 +20,15 @@ import { cyMenuItems, useCYContextMenuHook } from "./cyContextMenuHook";
 import lodash from "lodash";
 import { useGlobalDialog } from "./GlobalDialog";
 
+const cyDefaultSetting = {
+  pan: { x: 0, y: 0 },
+  zoom: 1,
+  data: {
+    nodes: [],
+    edges: [],
+  },
+};
+
 type ICyExtensions = {
   cyMenu: any;
   cyEdgeHandles: any;
@@ -53,14 +62,12 @@ const getUngroupBatch = (group: cytoscape.NodeSingular) => [
 ];
 
 function useCYHook() {
-  const [savedChartElements, setSavedChartElements] = useState<IMainData>({
-    nodes: [],
-    edges: [],
-  });
-  const [chartElements, setChartElements] = useState<IMainData>({
-    nodes: [],
-    edges: [],
-  });
+  const [savedChartElements, setSavedChartElements] = useState<IMainData>(
+    cyDefaultSetting.data
+  );
+  const [chartElements, setChartElements] = useState<IMainData>(
+    cyDefaultSetting.data
+  );
   const [isLoaded, setLoaded] = useState<boolean>(false);
   const [isAutoSetPosition, setIsAutoSetPosition] = useState<boolean>(false);
   const [cy, setCY] = useState<cytoscape.Core | undefined>();
@@ -78,20 +85,28 @@ function useCYHook() {
 
   const init = useCallback(
     function init() {
-      let data: IMainData;
+      let data: IMainData = cyDefaultSetting.data;
 
       if (savedChartElements.nodes.length) {
         setChartElements(lodash.cloneDeep(savedChartElements));
         return;
       }
-      if (cookies.data) data = cookies.data;
-      else data = defaultData;
+      if (cookies.data && (cookies.data?.nodes?.length || cookies.data?.edge?.length))
+        data = cookies.data;
+      else {
+        setCookie("pan", cyDefaultSetting.pan);
+        setCookie("zoom", cyDefaultSetting.zoom);
+      }
+      //   else data = defaultData;
+
+      console.log("aaaaaa", data, data.nodes[3]);
 
       setSavedChartElements(lodash.cloneDeep(data));
       setChartElements(lodash.cloneDeep(data));
     },
-    [cookies.data, savedChartElements, setChartElements, setSavedChartElements]
+    [cookies.data, savedChartElements, setCookie]
   );
+
   useEffect(init, []);
 
   const saveSnapshotChartElements = useCallback(
@@ -279,13 +294,21 @@ function useCYHook() {
           cyCompoundDragAndDrop,
         };
         cyMenu.appendMenuItems(getCYMenuItems);
-        if (cookies.pan) cyCore.pan(cookies.pan);
-        if (cookies.zoom) cyCore.zoom(cookies.zoom);
+        cyCore.pan(cookies.pan ?? cyDefaultSetting.pan);
+        cyCore.zoom(cookies.zoom ?? cyDefaultSetting.zoom);
         setCY(cyCore);
         setCYExtensions(newCyExtensions);
+        console.log("bbbbb", cyCore.nodes()[3]);
       }
     },
-    [chartElements, cy, getCYMenuItems, cyMenuOptions]
+    [
+      chartElements,
+      cy,
+      cyMenuOptions,
+      getCYMenuItems,
+      cookies.pan,
+      cookies.zoom,
+    ]
   );
 
   useEffect(
@@ -300,39 +323,32 @@ function useCYHook() {
         setIsAutoSetPosition(false);
         cy.fit();
       } else
-        cy.nodes().forEach((node: cytoscape.NodeSingular, i: number) => {
-          const id = node.id();
-          const position: cytoscape.Position | undefined =
-            chartElements.nodes.find((e: any) => e.data.id == id)?.data
-              .position;
-          console.log(id, position, chartElements);
-          if (position) node.position(position);
-        });
+        cy.ready(() => {
+          setTimeout(() => {
+            cy.nodes().forEach((node: cytoscape.NodeSingular, i: number) => {
+              const id = node.id();
+              cy.nodes(`#${id}`).positions( node.data('position') )
+            });
+          }, 500);
 
-      cy.on("dbltap", "node, edge", function (event: any) {
-        dispatch({
-          type: GlobalReducerActionType.cyContentMenuEventTrigger,
-          payload: {
-            cyContextMenuEvent: {
-              eventName: cyMenuItems.properties,
-              event,
-            },
-          },
-        });
-      });
+          cy.on("dbltap", "node, edge", function (event: any) {
+            dispatch({
+              type: GlobalReducerActionType.cyContentMenuEventTrigger,
+              payload: {
+                cyContextMenuEvent: {
+                  eventName: cyMenuItems.properties,
+                  event,
+                },
+              },
+            });
+          });
 
-      // Update data position when user drag
-      // cy.on("dragfree", "node", function (e: any) {
-      //   const nodes = cy.nodes().jsons();
-      //   console.log(nodes);
-      //   nodes.forEach((node: any) => {
-      //     const targetData = chartElements.nodes.find(
-      //       (e: any) => e.data.id == node.data.id
-      //     );
-      //     if (targetData) targetData.data.position = node.position;
-      //   });
-      //   setChartElements(chartElements);
-      // });
+          // Update data position when user drag
+          cy.on("dragfree", "node", function (e: any) {
+            const nodes = cy.nodes().jsons();
+            console.log(cy, chartElements, nodes);
+          });
+        });
     },
     [cy, isAutoSetPosition, chartElements, setCookie, dispatch]
   );
